@@ -1,0 +1,178 @@
+services:
+  config-server:
+    build:
+      context: ./config-server
+      dockerfile: Dockerfile
+    ports:
+      - "8071:8071"
+    healthcheck:
+      test: "curl --fail --silent 167.172.78.79:8888/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    extends:
+      file: common-config.yml
+      service: microservice-base-config
+
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    ports:
+      - "8070:8070"
+    depends_on:
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: "curl --fail --silent 167.172.78.79:8761/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+    environment:
+      SPRING_APPLICATION_NAME: "eureka-server"
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka-server
+      - config-server
+    environment:
+      SPRING_APPLICATION_NAME: "api-gateway"
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  user-profile:
+    build:
+      context: ./user-profile
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8085"
+    healthcheck:
+      test: "curl --fail --silent 167.172.78.79:8085/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  identity-service:
+    build:
+      context: ./identity-service
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    healthcheck:
+      test: "curl --fail --silent 167.172.78.79:8083/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  forum-service:
+    build:
+      context: ./forum-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    healthcheck:
+      test: "curl --fail --silent 167.172.78.79:8081/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  content-service:
+    build:
+      context: ./content-service
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    healthcheck:
+      test: "curl --fail --silent 167.172.78.79:8082/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  engagement-service:
+    build:
+      context: ./engagement-service
+      dockerfile: Dockerfile
+    ports:
+      - "8086:8086"
+    healthcheck:
+      test: "curl --fail --silent 167.172.78.79:8086/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  content-discovery:
+    build:
+      context: ./content-discovery
+      dockerfile: Dockerfile
+    ports:
+      - "8087:8087"
+    healthcheck:
+      test: "curl --fail --silent 167.172.78.79:8087/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8084"
+    healthcheck:
+      test: "curl --fail --silent 167.172.78.79:8084/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+networks:
+  code-advisor:
+    driver: "bridge"
+
+
+---
+#user-profile port: 8085
+#identity-service port: 8083
+#forum-service port: 8081
+#content-service: 8082
+#engagement-service port: 8086
+#content-discovery port: 8087
+#notification-service port: 8084
